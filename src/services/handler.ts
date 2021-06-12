@@ -2,48 +2,116 @@ import fs from 'fs';
 import path from 'path';
 import csv  from 'csv-parser';
 import { ConsumptionModel } from '../types/consumption/consumption.model';
+import { parse } from '../tools/parser';
 
 class Handler {
-
-    init() {}
 
     /**
      * @author Alberto Machado Garcia
      * 
      * @description Method to load all data from csv in the database
      */
-    preloadData(db: any) {
-        const directory = fs.readdirSync(path.join(__dirname, '../utility'));
-        directory.forEach( element => {
-            fs.createReadStream(element)
-                .pipe(csv())
-                .on('data', (data) => this.insertData(element))
-                .on('end', () => {
-                    console.log(`Database updated with file ${element}`);
-                });
-        })
+    preloadData() {
+        const pathDir = path.join(__dirname, '../../utility');
+        const directory = fs.readdirSync(pathDir);
+        try {
+            directory.forEach( element => {
+                fs.createReadStream(path.join(pathDir, element))
+                    .pipe(csv())
+                    .on('data', (data) => this.insertData(parse(data)))
+                    .on('end', () => {
+                        console.log(`Database updated with file ${element}`);
+                    });
+            });
+            return true;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
     }
 
     /**
      * @author Alberto Machado Garcia
      * 
-     * @param db 
-     * @param element 
+     * @param element Object to save in the database
      * 
      * @description Method to insert new object in the database
      */
     async insertData(element: any) {
         try {
+            if (!element.date) {
+                return false;
+            }
             await ConsumptionModel.create(element);
+            return true;
         } catch (e) {
-            console.log('Error trying insert in the Database');
-            
+            console.log(`Error trying insert data for: ${e}`);
+            return false;
         }
     }
 
+    /**
+     * @author Alberto Machado Garcia
+     * 
+     * @returns Return the information saved in the database
+     */
     async getAll() {
-        const res = await ConsumptionModel.find({});
-        console.log(res);
+        try {
+            return await ConsumptionModel.find({});
+        } catch (e) {
+            return [];
+        }
+    }
+
+    /**
+     * @author Alberto Machado Garcia
+     * 
+     * @returns Return true o false depending if we can remove all data from database
+     */
+    async removeAll() {
+        try {
+            await ConsumptionModel.deleteMany({});
+            return true;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
+    /**
+     * @author Alberto Machado Garcia
+     * 
+     * @param element Key value to find an element in the database
+     * 
+     * @description Find an element through the object received in the parameter
+     * 
+     * @return Return the element found
+     */
+    async findElement(element: any) {
+        try {
+            const response = await ConsumptionModel.find(element);
+            return response;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
+    /**
+     * @author Alberto Machado Garcia
+     * 
+     * @param element Object to update in the database
+     * 
+     * @description Update the element in the database
+     */
+    async updateElement(element: any, newElement: any) {
+        try {
+            await ConsumptionModel.updateOne(element, newElement, { multi: true });
+            return true;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
     }
 
 }

@@ -24,11 +24,11 @@ export const connect = () => {
     database = mongoose.connection;
 
     database.once("open", async () => {
-        console.log("Connected to database");
+        console.log('Connected to the database');
     });  
     
     database.on("error", () => {
-        console.log("Error connecting to database");
+        console.log('Error connecting to the database');
     });
 };
 
