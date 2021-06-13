@@ -3,6 +3,7 @@ import ROUTES from './routes/routes';
 import { connect } from './tools/database';
 import Handler from './services/handler';
 import bodyParser from 'body-parser';
+import cors from 'cors';
 
 const app = express();
 const port = 8080;
@@ -14,6 +15,7 @@ connect();
 */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
     
 app.post(ROUTES.preload, ( req, res ) => {
     const result = Handler.preloadData();
@@ -51,7 +53,7 @@ app.get(ROUTES.crud.getAll, async ( req, res ) => {
     }
 })
 
-app.delete(ROUTES.crud.removeAll, async ( req, res ) => {
+app.post(ROUTES.crud.removeAll, async ( req, res ) => {
     const result = await Handler.removeAll();
     if (result) {
         res.status(202).send('');
@@ -61,7 +63,16 @@ app.delete(ROUTES.crud.removeAll, async ( req, res ) => {
 })
 
 app.post(ROUTES.crud.update, async ( req, res ) => {
-    const result = await Handler.updateElement(req.body.element, req.body.newElement);
+    const result = await Handler.updateElement(req.body);
+    if (result) {
+        res.status(202).send('');
+    } else {
+        res.status(400).send('Error trying update the element in the database');
+    }
+})
+
+app.post(ROUTES.crud.removeOne, async ( req, res ) => {
+    const result = await Handler.removeOneElement(req.body);
     if (result) {
         res.status(202).send('');
     } else {

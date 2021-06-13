@@ -4,7 +4,8 @@ const ROUTES = {
         getAll: '/getAll',
         removeAll: '/removeAll',
         findElement: '/find',
-        update: '/update'
+        update: '/update',
+        removeOne: '/removeOne'
     },
     preload: '/preload'
 }

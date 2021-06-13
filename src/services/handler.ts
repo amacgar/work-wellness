@@ -92,7 +92,6 @@ class Handler {
             const response = await ConsumptionModel.find(element);
             return response;
         } catch (e) {
-            console.log(e);
             return false;
         }
     }
@@ -104,9 +103,25 @@ class Handler {
      * 
      * @description Update the element in the database
      */
-    async updateElement(element: any, newElement: any) {
+    async updateElement(element: any) {
         try {
-            await ConsumptionModel.updateOne(element, newElement, { multi: true });
+            const exist = await this.findElement({_id: element._id});
+            if (exist) {
+                await ConsumptionModel.updateOne({_id: element._id}, element, { multi: true });
+            } else {
+                delete element._id;
+                await this.insertData(element);
+            }
+            return true;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
+    async removeOneElement(element: any) {
+        try {
+            await ConsumptionModel.deleteOne(element);
             return true;
         } catch (e) {
             console.log(e);
