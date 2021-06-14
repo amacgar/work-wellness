@@ -92,7 +92,7 @@ class Handler {
             const response = await ConsumptionModel.find(element);
             return response;
         } catch (e) {
-            return false;
+            return [];
         }
     }
 
@@ -106,7 +106,7 @@ class Handler {
     async updateElement(element: any) {
         try {
             const exist = await this.findElement({_id: element._id});
-            if (exist) {
+            if (exist.length > 0) {
                 await ConsumptionModel.updateOne({_id: element._id}, element, { multi: true });
             } else {
                 delete element._id;

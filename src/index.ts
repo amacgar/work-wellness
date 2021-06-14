@@ -10,21 +10,14 @@ const port = 8080;
 
 connect();
 
+const result = Handler.preloadData();
+
 /**
  * Parse the request to get the body in JSON format
 */
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
-    
-app.post(ROUTES.preload, ( req, res ) => {
-    const result = Handler.preloadData();
-    if (result) {
-        res.status(202).send('');
-    } else {
-        res.status(400).send('');
-    }
-})
 
 app.post(ROUTES.crud.insert, async ( req, res ) => {
     const result = await Handler.insertData(req.body);
